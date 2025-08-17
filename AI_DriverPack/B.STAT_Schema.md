@@ -16,7 +16,7 @@
 
 #### **2. 데이터 스키마 정의 (Data Schema Definition)**
 ```yaml
-schema_version: "1.0.0"
+schema_version: "1.0.0.0"
 
 # ==========================================================
 # 1. 스탯 정의 (EPIC-STAT-01)
