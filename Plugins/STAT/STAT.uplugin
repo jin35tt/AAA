@@ -18,8 +18,8 @@
     },
     {
       "Name": "STATTests",
-      "Type": "UncookedOnly",
-      "LoadingPhase": "Default"
+      "Type": "Editor",
+      "LoadingPhase": "PostEngineInit"
     }
   ]
 }
