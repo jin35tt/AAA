@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameplayTagContainer.h"
+#include "NativeGameplayTags.h"
 
 /** Gameplay tags for core combat fun factors from Mp00 and M_ProjectAAA mdc. */
 namespace STATTags

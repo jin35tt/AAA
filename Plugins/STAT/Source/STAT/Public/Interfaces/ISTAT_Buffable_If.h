@@ -2,7 +2,7 @@
 
 #include "UObject/Interface.h"
 #include "GameplayTagContainer.h"
-#include "FSTAT_Structures.h"
+#include "Data/FSTAT_Structures.h"
 #include "ISTAT_Buffable_If.generated.h"
 
 UINTERFACE(MinimalAPI, Blueprintable)

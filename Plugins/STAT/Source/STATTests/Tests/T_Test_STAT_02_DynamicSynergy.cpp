@@ -1,6 +1,7 @@
+#include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 
-IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTest_STAT_DynamicSynergy, "ProjectAAA.STAT.DynamicSynergy", EAutomationTestFlags::ApplicationContextMask | EAutomationTestFlags::ProductFilter)
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FTest_STAT_DynamicSynergy, "ProjectAAA.STAT.DynamicSynergy", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)
 
 bool FTest_STAT_DynamicSynergy::RunTest(const FString& Parameters)
 {

@@ -1,3 +1,4 @@
+#include "CoreMinimal.h"
 #include "Misc/AutomationTest.h"
 
 IMPLEMENT_SIMPLE_AUTOMATION_TEST(FFlowAndSignatureTest, "ProjectAAA.STAT.CoreFunFactor.FlowAndSignature", EAutomationTestFlags::EditorContext | EAutomationTestFlags::EngineFilter)

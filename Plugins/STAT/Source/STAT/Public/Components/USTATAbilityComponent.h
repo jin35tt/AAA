@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "FSTAT_Structures.h"
+#include "Data/FSTAT_Structures.h"
 #include "GameplayTagContainer.h"
 #include "STAT_Tags.h"
 #include "USTATAbilityComponent.generated.h"
