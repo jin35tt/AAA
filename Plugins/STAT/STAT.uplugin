@@ -19,7 +19,7 @@
     {
       "Name": "STATTests",
       "Type": "Editor",
-      "LoadingPhase": "PostEngineInit"
+      "LoadingPhase": "None"
     }
   ]
 }
