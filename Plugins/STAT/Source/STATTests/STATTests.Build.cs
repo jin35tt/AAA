@@ -5,7 +5,6 @@ public class STATTests : ModuleRules
 {
     public STATTests(ReadOnlyTargetRules Target) : base(Target)
     {
-        Type = ModuleType.Editor;
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
         if (!Target.bBuildEditor)
