@@ -8,9 +8,10 @@
 #include "Interfaces/STAT_Overloadable_If.h"
 #include "Interfaces/STAT_Fusion_If.h"
 #include "STATTypes.h"
+#include "Async/Future.h"
 #include "USTATAbilityComponent.generated.h"
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSTAT_OnStatChanged_E);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSTAT_OnStatChanged_E, const FSTAT_ChangedPayload&, Payload);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSTAT_OnSignatureChargeChanged_E);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSTAT_OnSignatureChargeReady_E);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FSTAT_OnFlowStackChanged_E);
@@ -77,14 +78,12 @@ public:
     UFUNCTION(BlueprintCallable, Category="STAT|Damage")
     FGameplayTagContainer CollectDefenseRules();
 
-    UFUNCTION(BlueprintCallable, Category="STAT|Damage")
-    void MatchAttackVsDefense();
+    TFuture<bool> MatchAttackVsDefense(const FGameplayTagContainer& AttackTags, const FGameplayTagContainer& IgnoreAttackTags);
+
+    TFuture<float> ComputeFinalDamage(float BaseDamage, const FGameplayTagContainer& AttackTags, const TMap<FGameplayTag, float>& DefenderStats);
 
     UFUNCTION(BlueprintCallable, Category="STAT|Damage")
-    void ComputeFinalDamage();
-
-    UFUNCTION(BlueprintCallable, Category="STAT|Damage")
-    void ApplyDamageToTarget();
+    void ApplyDamageToTarget(float FinalDamage, AActor* Instigator, const FGameplayTag& SourceTag, UObject* SourceObject);
 
     UFUNCTION(BlueprintCallable, Category="STAT|Upgrade")
     void ValidateUpgradable();
@@ -136,5 +135,9 @@ public:
 
     UFUNCTION(BlueprintCallable, Category="STAT|Counterplay")
     void Counterplay_Resolve();
+
+protected:
+    UPROPERTY()
+    TMap<FGameplayTag, float> StatMap;
 };
 

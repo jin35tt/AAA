@@ -1,6 +1,8 @@
 #include "USTATAbilityComponent.h"
 #include "Interfaces/STAT_DefenseProvider_If.h"
 #include "ProfilingDebugging/CpuProfilerTrace.h"
+#include "Async/Async.h"
+#include "Async/TaskGraphInterfaces.h"
 
 USTATAbilityComponent::USTATAbilityComponent()
 {
@@ -71,19 +73,65 @@ FGameplayTagContainer USTATAbilityComponent::CollectDefenseRules()
     return CombinedIgnoreTags;
 }
 
-void USTATAbilityComponent::MatchAttackVsDefense()
+TFuture<bool> USTATAbilityComponent::MatchAttackVsDefense(const FGameplayTagContainer& AttackTags, const FGameplayTagContainer& IgnoreAttackTags)
 {
-    // TODO: Match attack vs defense
+    return UE::Tasks::Launch(UE_SOURCE_LOCATION, [AttackTags, IgnoreAttackTags]()
+    {
+        TRACE_CPUPROFILER_EVENT_SCOPE(MatchAttackVsDefense_AsyncTask);
+        return IgnoreAttackTags.HasAny(AttackTags);
+    });
 }
 
-void USTATAbilityComponent::ComputeFinalDamage()
+TFuture<float> USTATAbilityComponent::ComputeFinalDamage(float BaseDamage, const FGameplayTagContainer& AttackTags, const TMap<FGameplayTag, float>& DefenderStats)
 {
-    // TODO: Compute final damage
+    return UE::Tasks::Launch(UE_SOURCE_LOCATION, [BaseDamage, AttackTags, DefenderStats]()
+    {
+        TRACE_CPUPROFILER_EVENT_SCOPE(ComputeFinalDamage_AsyncTask);
+        float FinalDamage = BaseDamage;
+
+        TArray<FGameplayTag> Tags;
+        AttackTags.GetGameplayTagArray(Tags);
+
+        for (const FGameplayTag& Tag : Tags)
+        {
+            FString TagString = Tag.ToString();
+            const FString Prefix = TEXT("Damage.Type.");
+            if (TagString.StartsWith(Prefix))
+            {
+                TagString.ReplaceInline(*Prefix, TEXT("Stat.Resistance."));
+                const FGameplayTag ResistanceTag = FGameplayTag::RequestGameplayTag(*TagString);
+                const float ResistanceValue = DefenderStats.FindRef(ResistanceTag);
+                FinalDamage *= (1.0f - ResistanceValue);
+            }
+        }
+
+        return FinalDamage;
+    });
 }
 
-void USTATAbilityComponent::ApplyDamageToTarget()
+void USTATAbilityComponent::ApplyDamageToTarget(float FinalDamage, AActor* Instigator, const FGameplayTag& SourceTag, UObject* SourceObject)
 {
-    // TODO: Apply damage to target
+    TRACE_CPUPROFILER_EVENT_SCOPE(ApplyDamageToTarget_GameThread);
+
+    static const FGameplayTag TAG_Stat_Core_HP_Current = FGameplayTag::RequestGameplayTag(TEXT("Stat.Core.HP.Current"));
+    static const FGameplayTag TAG_Stat_Core_HP_Max = FGameplayTag::RequestGameplayTag(TEXT("Stat.Core.HP.Max"));
+
+    const float PreviousHP = StatMap.FindRef(TAG_Stat_Core_HP_Current);
+    const float MaxHP = StatMap.FindRef(TAG_Stat_Core_HP_Max);
+    const float NewHP = FMath::Max(0.0f, PreviousHP - FinalDamage);
+    StatMap.Add(TAG_Stat_Core_HP_Current, NewHP);
+
+    FSTAT_ChangedPayload Payload;
+    Payload.StatTag = TAG_Stat_Core_HP_Current;
+    Payload.PreviousValue = PreviousHP;
+    Payload.CurrentValue = NewHP;
+    Payload.Delta = NewHP - PreviousHP;
+    Payload.MaxValue = MaxHP;
+    Payload.Instigator = Instigator;
+    Payload.SourceTag = SourceTag;
+    Payload.SourceObject = SourceObject;
+
+    STAT_OnStatChanged_E.Broadcast(Payload);
 }
 
 void USTATAbilityComponent::ValidateUpgradable()
