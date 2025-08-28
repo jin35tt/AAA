@@ -2,6 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Engine/DataTable.h"
+#include "Curves/CurveFloat.h"
 #include "STATTypes.generated.h"
 
 class AActor;
@@ -18,6 +20,18 @@ struct FSTAT_Modifier
 {
     GENERATED_BODY()
     // TODO: Define modifier fields
+};
+
+USTRUCT(BlueprintType)
+struct FSTAT_StatDefinitionRow : public FTableRowBase
+{
+    GENERATED_BODY()
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="STAT")
+    bool CanBeUpgraded = false;
+
+    UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="STAT")
+    TObjectPtr<UCurveFloat> RequiredPointCurve = nullptr;
 };
 
 USTRUCT(BlueprintType)

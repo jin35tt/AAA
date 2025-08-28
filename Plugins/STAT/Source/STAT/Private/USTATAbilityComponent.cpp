@@ -134,9 +134,41 @@ void USTATAbilityComponent::ApplyDamageToTarget(float FinalDamage, AActor* Insti
     STAT_OnStatChanged_E.Broadcast(Payload);
 }
 
-void USTATAbilityComponent::ValidateUpgradable()
+bool USTATAbilityComponent::ValidateUpgradable(const FGameplayTag& StatTagToUpgrade)
 {
-    // TODO: Validate upgradable
+    TRACE_CPUPROFILER_EVENT_SCOPE(ValidateUpgradable_GameThread);
+
+    if (!StatDefinitionTable)
+    {
+        ensureMsgf(false, TEXT("StatDefinitionTable is null"));
+        return false;
+    }
+
+    const FSTAT_StatDefinitionRow* Row = StatDefinitionTable->FindRow<FSTAT_StatDefinitionRow>(
+        StatTagToUpgrade.GetTagName(), TEXT("ValidateUpgradable"));
+    if (!Row)
+    {
+        ensureMsgf(false, TEXT("Stat definition not found for tag %s"), *StatTagToUpgrade.ToString());
+        return false;
+    }
+
+    if (!Row->CanBeUpgraded)
+    {
+        return false;
+    }
+
+    const int32 CurrentUpgradeLevel = UpgradeLevelMap.FindRef(StatTagToUpgrade);
+    const float RequiredPoints = Row->RequiredPointCurve
+        ? Row->RequiredPointCurve->GetFloatValue(CurrentUpgradeLevel + 1)
+        : 0.0f;
+
+    const float CurrentPoints = CurrentUpgradePoints;
+    if (CurrentPoints < RequiredPoints)
+    {
+        return false;
+    }
+
+    return true;
 }
 
 void USTATAbilityComponent::ConsumeResource()

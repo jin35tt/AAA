@@ -9,6 +9,7 @@
 #include "Interfaces/STAT_Fusion_If.h"
 #include "STATTypes.h"
 #include "Async/Future.h"
+#include "Engine/DataTable.h"
 #include "USTATAbilityComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FSTAT_OnStatChanged_E, const FSTAT_ChangedPayload&, Payload);
@@ -85,8 +86,8 @@ public:
     UFUNCTION(BlueprintCallable, Category="STAT|Damage")
     void ApplyDamageToTarget(float FinalDamage, AActor* Instigator, const FGameplayTag& SourceTag, UObject* SourceObject);
 
-    UFUNCTION(BlueprintCallable, Category="STAT|Upgrade")
-    void ValidateUpgradable();
+      UFUNCTION(BlueprintCallable, Category="STAT|Upgrade")
+      bool ValidateUpgradable(const FGameplayTag& StatTagToUpgrade);
 
     UFUNCTION(BlueprintCallable, Category="STAT|Upgrade")
     void ConsumeResource();
@@ -136,8 +137,17 @@ public:
     UFUNCTION(BlueprintCallable, Category="STAT|Counterplay")
     void Counterplay_Resolve();
 
-protected:
-    UPROPERTY()
-    TMap<FGameplayTag, float> StatMap;
-};
+  protected:
+      UPROPERTY(EditDefaultsOnly, Category="STAT|Config")
+      TObjectPtr<UDataTable> StatDefinitionTable;
+
+      UPROPERTY()
+      TMap<FGameplayTag, int32> UpgradeLevelMap;
+
+      UPROPERTY(EditAnywhere, Category="STAT|Upgrade")
+      float CurrentUpgradePoints = 0.0f;
+
+      UPROPERTY()
+      TMap<FGameplayTag, float> StatMap;
+  };
 
