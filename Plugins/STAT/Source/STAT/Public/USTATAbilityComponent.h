@@ -75,7 +75,7 @@ public:
 
     // Internal Methods
     UFUNCTION(BlueprintCallable, Category="STAT|Damage")
-    void CollectDefenseRules();
+    FGameplayTagContainer CollectDefenseRules();
 
     UFUNCTION(BlueprintCallable, Category="STAT|Damage")
     void MatchAttackVsDefense();

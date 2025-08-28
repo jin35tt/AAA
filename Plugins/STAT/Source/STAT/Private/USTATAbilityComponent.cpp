@@ -1,4 +1,6 @@
 #include "USTATAbilityComponent.h"
+#include "Interfaces/STAT_DefenseProvider_If.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 
 USTATAbilityComponent::USTATAbilityComponent()
 {
@@ -40,9 +42,33 @@ void USTATAbilityComponent::NotifyFusionEvent_Implementation(FGameplayTag EventT
     // TODO: Fusion event logic
 }
 
-void USTATAbilityComponent::CollectDefenseRules()
+FGameplayTagContainer USTATAbilityComponent::CollectDefenseRules()
 {
-    // TODO: Collect defense rules
+    TRACE_CPUPROFILER_EVENT_SCOPE(USTATAbilityComponent::CollectDefenseRules);
+
+    FGameplayTagContainer CombinedIgnoreTags;
+
+    AActor* OwnerActor = GetOwner();
+    if (!IsValid(OwnerActor))
+    {
+        return CombinedIgnoreTags;
+    }
+
+    TArray<UActorComponent*> DefenseProviders;
+    OwnerActor->GetComponentsByInterface(USTAT_DefenseProvider_If::StaticClass(), DefenseProviders);
+
+    for (UActorComponent* Component : DefenseProviders)
+    {
+        if (!IsValid(Component))
+        {
+            continue;
+        }
+
+        const FGameplayTagContainer Tags = I_STAT_DefenseProvider_If::Execute_GetIgnoreAttackTags(Component);
+        CombinedIgnoreTags.AppendTags(Tags);
+    }
+
+    return CombinedIgnoreTags;
 }
 
 void USTATAbilityComponent::MatchAttackVsDefense()
