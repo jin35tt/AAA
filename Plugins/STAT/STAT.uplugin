@@ -1,0 +1,15 @@
+{
+  "FileVersion": 3,
+  "Version": 1,
+  "VersionName": "1.0",
+  "FriendlyName": "STAT Plugin",
+  "Description": "Character status system plugin skeleton",
+  "Category": "Gameplay",
+  "Modules": [
+    {
+      "Name": "STAT",
+      "Type": "Runtime",
+      "LoadingPhase": "Default"
+    }
+  ]
+}
